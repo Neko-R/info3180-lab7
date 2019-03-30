@@ -12,6 +12,9 @@ Vue.component('app-header', {
           <li class="nav-item active">
             <router-link class="nav-link" to="/">Home <span class="sr-only">(current)</span></router-link>
           </li>
+          <li class="nav-item active">
+            <router-link class="nav-link" to="/upload">Form <span class="sr-only">(current)</span></router-link>
+          </li>
         </ul>
       </div>
     </nav>
@@ -27,6 +30,38 @@ Vue.component('app-footer', {
     </footer>
     `
 });
+
+const Form = Vue.component('upload-form', {
+    template: `
+    <form id="uploadForm" @submit.prevent="uploadPhoto" method="post" enctype="multipart/form-data">
+        {{ form.csrf_token }}
+        <div  class="section">
+            {{ form.description.label }}
+            {{ form.description }}
+        </div>
+        <div  class="section">
+            {{ form.photo.label }}
+            {{ form.photo(multiple="multiple") }}    
+        </div>
+    </form>
+    `,
+    methods: {
+        uploadPhoto: function(){
+            let self = this;
+            let uploadForm = document.getElementById('uploadForm');
+            let form_data = new FormData(uploadForm); 
+            fetch("/api/upload", { method: 'POST', body: form_data, headers: {'X-CSRFToken': token}, credentials: 'same-origin' }).then(function (response) { 
+                                                                                                                                            return response.json();
+                                                                                                                                    }).then(function (jsonResponse) { console.log(jsonResponse);
+                                                                                                                                            }).catch(function (error) {
+                                                                                                                                                            console.log(error);
+                                                                                                                                                    });
+        }
+
+    }
+    
+});
+
 
 const Home = Vue.component('home', {
    template: `
@@ -57,6 +92,7 @@ const router = new VueRouter({
     routes: [
         {path: "/", component: Home},
         // Put other routes here
+        {path: "/upload", component: Form},
 
         // This is a catch all route in case none of the above matches
         {path: "*", component: NotFound}

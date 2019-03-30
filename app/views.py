@@ -21,6 +21,7 @@ from werkzeug.utils import secure_filename
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def index(path):
+    myform = UploadForm()
     """
     Because we use HTML5 history mode in vue-router we need to configure our
     web server to redirect all routes to index.html. Hence the additional route
@@ -28,7 +29,7 @@ def index(path):
 
     Also we will render the initial webpage and then let VueJS take control.
     """
-    return render_template('index.html')
+    return render_template('index.html', form=myform)
 
 @app.route('/api/upload', methods = ['POST'])
 def upload():
@@ -40,11 +41,11 @@ def upload():
             f = myform.photo.data
             filename = secure_filename(f.filename)
             f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        return {
-                "message": "File Upload Successful",
-                "filename": filename,
-                "description": myform.description
-                }
+            return {
+                    "message": "File Upload Successful",
+                    "filename": filename,
+                    "description": request.form["description"]
+                    }
     return form_errors({ "errors": [{}, {}] })
 
 
